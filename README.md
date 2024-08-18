@@ -1,0 +1,1 @@
+# boilerplate-create-cluster-aws-with-ansible
