@@ -1,0 +1,17 @@
+ansible-runner==2.3.6 # run ansible playbooks
+boto3==1.35.0 # AWS SDK for Python
+botocore==1.35.0
+docutils==0.20.1
+importlib-metadata==6.2.1
+jmespath==1.0.1
+lockfile==0.12.2
+packaging==24.1
+pexpect==4.9.0
+ptyprocess==0.7.0
+python-daemon==3.0.1
+python-dateutil==2.9.0.post0
+PyYAML==6.0.2
+s3transfer==0.10.2
+six==1.16.0
+urllib3==1.26.19
+zipp==3.20.0
