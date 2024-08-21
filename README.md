@@ -52,6 +52,16 @@ When managing secrets in Ansible, it is crucial to treat sensitive information w
    Ansible Vault allows you to encrypt files containing sensitive information to prevent exposure in plain text. To use Ansible Vault:
    - Create a file named vault-pass to store the password for encrypting and decrypting your secrets.
    - Use this password with Ansible Vault commands to secure your sensitive data.
+   - Generate a random password with openSSL : openssl rand -base64 32 > vault-pass
+   -  To encrypt a variable, use the ansible-vault encrypt_string command:
+   ```
+   ansible-vault encrypt_string 'your_secret_variable' --name 'your_variable_name'
+   ```
+   - You can use this var in your playbook like this:
+   ```
+   - {{ "your_variable_name" }}
+   ```
+         
    # Configuration for Running Playbooks
    - Configure your ansible.cfg file with the following settings to manage your playbooks securely:
    ```
