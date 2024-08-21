@@ -48,6 +48,15 @@ When managing secrets in Ansible, it is crucial to treat sensitive information w
 ## Steps for Managing Secrets
    # Create a Secure Directory
    - Create a private directory named private in the root of your project to store sensitive files.
+   - the structure of the private directory should look like this:
+   ```
+   private/
+   ├── vault-pass
+   ├── ansible.cfg
+   ├── group_vars/
+   │   └── vars
+   ```
+
    # Use Ansible Vault for Encryption
    Ansible Vault allows you to encrypt files containing sensitive information to prevent exposure in plain text. To use Ansible Vault:
    - Create a file named vault-pass to store the password for encrypting and decrypting your secrets.
@@ -83,3 +92,9 @@ When managing secrets in Ansible, it is crucial to treat sensitive information w
    - Man-in-the-Middle (MitM) Attacks: Disabling host key checking means Ansible will not verify the authenticity of the SSH server's key. This can lead to Man-in-the-Middle attacks, where an attacker might intercept the connection and gain access to sensitive data or execute unauthorized commands.
    # Using Root User
    - Privilege Escalation: Setting remote_user to root means that all commands executed through Ansible will have full administrative privileges. This increases the risk of security issues if your playbooks or roles contain vulnerabilities or are used maliciously, potentially granting an attacker root access to the remote system.
+
+# Execution d'un playbook ansible en mode simulation
+- ansible-playbook simple_test_playbook_ansible/create_simple_vpc_test.yaml --check -vv
+
+# To pass variables to an Ansible playbook from the command line rather than defining them within the playbook itself, use the following command:
+- ansible-playbook create_vpc.yaml -e "@your-path/group_vars/vars.yml"

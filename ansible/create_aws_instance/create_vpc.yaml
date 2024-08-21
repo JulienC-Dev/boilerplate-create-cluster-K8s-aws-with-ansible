@@ -1,0 +1,56 @@
+---
+- name: Create a VPC in AWS
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - amazon.aws
+    
+  tasks:
+    - name: Gather AMI IDs
+      amazon.aws.ec2_ami_info:
+        region: "{{ region }}"
+        filters:
+          name: "{{ ami_filters.name }}"
+          state: "{{ ami_filters.state }}"
+          owner_alias: "{{ ami_filters.owner_alias }}"
+      register: amis
+
+    - name: Setup an instance
+      amazon.aws.ec2_instance:
+        name: "{{ ec2_instance_name }}"
+        instance_type: t2.nano
+        image_id: "{{ (amis.images | sort(attribute='creation_date') | last).image_id }}"
+        wait: yes
+        volumes:
+          - device_name: /dev/xvda
+            ebs:
+              volume_size: 8
+              delete_on_termination: true
+      register: instance
+
+    - name: Gather {{ ec2_instance_name }} info
+      amazon.aws.ec2_instance_info:
+        filters:
+          tag:Name: "{{ ec2_instance_name }}"
+          include_attributes:
+            - instanceType
+            - kernel
+            - ramdisk
+            - userData
+            - disableApiTermination
+            - instanceInitiatedShutdownBehavior
+            - rootDeviceName
+            - blockDeviceMapping
+            - productCodes
+            - sourceDestCheck
+            - groupSet
+            - ebsOptimized
+            - sriovNetSupport
+            - enclaveOptions
+        register: instance_info
+
+    - name: Delete instance created
+      amazon.aws.ec2_instance:
+        state: absent
+        instance_ids: "{{ instance.instance_ids }}"
+        wait: false
