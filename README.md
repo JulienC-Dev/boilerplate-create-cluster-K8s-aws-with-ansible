@@ -93,7 +93,7 @@ When managing secrets in Ansible, it is crucial to treat sensitive information w
    ## Potential Risks
    ## Disabling SSH Host Key Checking
    - Man-in-the-Middle (MitM) Attacks: Disabling host key checking means Ansible will not verify the authenticity of the SSH server's key. This can lead to Man-in-the-Middle attacks, where an attacker might intercept the connection and gain access to sensitive data or execute unauthorized commands.
-   # Using Root User
+   ## Using Root User
    - Privilege Escalation: Setting remote_user to root means that all commands executed through Ansible will have full administrative privileges. This increases the risk of security issues if your playbooks or roles contain vulnerabilities or are used maliciously, potentially granting an attacker root access to the remote system.
 
 ## Execution d'un playbook ansible en mode simulation
