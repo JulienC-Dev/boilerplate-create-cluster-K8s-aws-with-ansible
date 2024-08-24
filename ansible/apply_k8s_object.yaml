@@ -1,0 +1,16 @@
+---
+- name: Deploy Flask app to Kubernetes
+  hosts: k8s_masternode
+  become: yes
+  tasks:
+    - name: Apply Flask Deployment
+      kubernetes.core.k8s:
+        state: present
+        kubeconfig: ~/.kube/config
+        definition: "{{ lookup('file', 'k8s/deployment.yaml') }}"
+
+    - name: Apply Flask Service
+      kubernetes.core.k8s:
+        state: present
+        kubeconfig: ~/.kube/config
+        definition: "{{ lookup('file', 'k8s/flask-service.yaml') }}"

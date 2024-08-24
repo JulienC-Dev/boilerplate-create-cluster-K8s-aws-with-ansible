@@ -1,0 +1,11 @@
+plugin: amazon.aws.aws_ec2
+
+aws_profile: default
+regions:
+  - eu-west-3
+filters:
+  instance-state-name: running
+groups:
+  k8s_masters:
+    filters:
+      tag:K8s: k8s_masternode

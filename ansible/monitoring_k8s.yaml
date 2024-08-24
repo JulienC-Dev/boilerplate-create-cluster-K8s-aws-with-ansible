@@ -1,0 +1,73 @@
+---
+- name: Install Prometheus, Grafana, and Node Exporter on Kubernetes
+  hosts: k8s_masternode
+  become: yes
+  tasks:
+    - name: Ensure Helm is installed
+      shell: |
+        if ! command -v helm &> /dev/null; then
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Add Prometheus Helm repository
+      shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+      args:
+        executable: /bin/bash
+
+    - name: Add Grafana Helm repository
+      shell: helm repo add grafana https://grafana.github.io/helm-charts
+      args:
+        executable: /bin/bash
+
+    - name: Update Helm repositories
+      shell: helm repo update
+      args:
+        executable: /bin/bash
+
+    - name: Install Prometheus using Helm
+      shell: helm install prometheus prometheus-community/prometheus
+      args:
+        executable: /bin/bash
+      register: prometheus_install
+
+    - name: Wait for Prometheus pods to be ready
+      shell: kubectl wait --for=condition=ready pod -l app=prometheus --timeout=300s
+      when: prometheus_install is succeeded
+      args:
+        executable: /bin/bash
+
+    - name: Install Grafana using Helm
+      shell: helm install grafana grafana/grafana
+      args:
+        executable: /bin/bash
+      register: grafana_install
+
+    - name: Wait for Grafana pods to be ready
+      shell: kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=grafana --timeout=300s
+      when: grafana_install is succeeded
+      args:
+        executable: /bin/bash
+
+    - name: Install Node Exporter using Helm
+      shell: helm install node-exporter prometheus-community/prometheus-node-exporter
+      args:
+        executable: /bin/bash
+      register: node_exporter_install
+
+    - name: Wait for Node Exporter pods to be ready
+      shell: kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=prometheus-node-exporter --timeout=300s
+      when: node_exporter_install is succeeded
+      args:
+        executable: /bin/bash
+
+    - name: Display Grafana admin password
+      shell: kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+      args:
+        executable: /bin/bash
+
+    - name: Display Grafana access URL
+      shell: echo "Access Grafana at http://$(kubectl get svc --namespace default grafana -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+      args:
+        executable: /bin/bash

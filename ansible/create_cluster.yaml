@@ -1,0 +1,58 @@
+- name: Install Docker and Kubernetes on all nodes
+  hosts: k8s_masternode
+  become: yes
+  tasks:
+    - name: Install Docker
+      ansible.builtin.yum:
+        name: docker
+        state: present
+
+    - name: Enable and start Docker
+      ansible.builtin.systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Add Kubernetes repository
+      ansible.builtin.yum_repository:
+        name: kubernetes
+        description: Kubernetes repository
+        baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+        gpgcheck: 1
+        repo_gpgcheck: 1
+        enabled: 1
+        gpgkey:
+          - https://packages.cloud.google.com/yum/doc/yum-key.gpg
+          - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+    - name: Install kubeadm, kubelet, and kubectl
+      ansible.builtin.yum:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+
+    - name: Enable and start kubelet
+      ansible.builtin.systemd:
+        name: kubelet
+        enabled: yes
+        state: started
+
+    - name: Initialize Kubernetes Master
+      command: kubeadm init
+      register: kubeadm_init
+      changed_when: "'kubeadm has already been initialized' in kubeadm_init.stdout"
+
+    - name: Set up kubeconfig for the root user
+      become_user: root
+      copy:
+        src: /private/admin.conf
+        dest: ~/.kube/config
+        mode: '0644'
+      when: kubeadm_init.changed
+
+    - name: Install a pod network
+      command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      register: pod_network
+      changed_when: "'flannel network' in pod_network.stdout"

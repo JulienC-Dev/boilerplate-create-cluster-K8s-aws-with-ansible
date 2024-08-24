@@ -1,0 +1,10 @@
+---
+- name: Delete EC2 instance
+  hosts: k8s_masternode
+  gather_facts: no
+  tasks:
+    - name: Delete instance created for tests
+      amazon.aws.ec2_instance:
+        state: absent
+        instance_ids: "{{ ec2.instance_ids }}"
+        wait: true

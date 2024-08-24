@@ -1,0 +1,6 @@
+- name: Print Public IP Addresses
+  hosts: k8s_masters
+  tasks:
+    - name: Show public IP address
+      debug:
+        msg: "Public IP Address: {{ hostvars[inventory_hostname]['public_ip_address'] | default('Not available') }}"
