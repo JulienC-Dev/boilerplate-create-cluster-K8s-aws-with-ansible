@@ -1,8 +1,7 @@
-# Boilerplate deploy K8s on AWS VPC Setup with Ansible
+# Boilerplate for Deploying Kubernetes on AWS with Ansible
 
-This repository contains a boilerplate to deploy a Kubernetes cluster on AWS using Ansible. The Ansible playbook will create a VPC, subnets, security groups, and EC2 instances and deploy a Kubernetes cluster on the EC2 instances.
-
-We also deploy a small application on the Kubernetes cluster to test the deployment.
+This repository provides a boilerplate for deploying a Kubernetes cluster on AWS using Ansible. The Ansible playbook provisions EC2 instances, sets up the Kubernetes cluster, and deploys Kubernetes objects along with cluster monitoring tools. 
+The objective is to enable end-to-end testing of your application before tearing down the cluster.
 
 ## Prerequisites
 
