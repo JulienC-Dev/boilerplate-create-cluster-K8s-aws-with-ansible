@@ -1,9 +1,9 @@
-- name: Check connectivity with echo kube
+- name: Run a ping command and a small k8s deployment
   hosts: k8s_masters
   gather_facts: yes
   user : ubuntu
   vars:
-    ansible_python_interpreter: auto # python3 is neccessary for print output 
+    ansible_python_interpreter: auto
   tasks:
     - name: Check connectivity with echo
       command: echo "Hello, World!"
