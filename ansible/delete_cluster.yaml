@@ -1,6 +1,6 @@
 ---
 - name: Delete EC2 instance
-  hosts: k8s_masternode
+  hosts: k8s_masters
   gather_facts: no
   user: ubuntu
   tasks:
