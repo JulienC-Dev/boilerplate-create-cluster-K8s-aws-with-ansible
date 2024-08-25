@@ -2,6 +2,7 @@
 - name: Delete EC2 instance
   hosts: k8s_masternode
   gather_facts: no
+  user: ubuntu
   tasks:
     - name: Delete instance created for tests
       amazon.aws.ec2_instance:

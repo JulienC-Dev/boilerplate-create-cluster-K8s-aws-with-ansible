@@ -15,7 +15,7 @@
           assign_public_ip: true
         count: 1
         tags:
-          K8s: k8s_masternode
+          K8s: k8s_masters
         state: started
         wait: true
       register: ec2

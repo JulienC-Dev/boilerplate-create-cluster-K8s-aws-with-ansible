@@ -1,5 +1,6 @@
 - name: Print Public IP Addresses
   hosts: k8s_masters
+  user: ec2-user
   tasks:
     - name: Show public IP address
       debug:

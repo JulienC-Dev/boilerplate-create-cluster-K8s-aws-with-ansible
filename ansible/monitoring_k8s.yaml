@@ -1,6 +1,7 @@
 ---
 - name: Install Prometheus, Grafana, and Node Exporter on Kubernetes
-  hosts: k8s_masternode
+  hosts: k8s_masters
+  user: ubuntu
   become: yes
   tasks:
     - name: Ensure Helm is installed

@@ -1,7 +1,8 @@
 ---
 - name: Deploy Flask app to Kubernetes
-  hosts: k8s_masternode
+  hosts: k8s_masters
   become: yes
+  user: ubuntu
   tasks:
     - name: Apply Flask Deployment
       kubernetes.core.k8s:
