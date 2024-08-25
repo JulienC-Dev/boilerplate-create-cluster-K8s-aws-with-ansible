@@ -1,27 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flask-app
+  name: nginx-deployment
+  namespace: nginx-namespace
   labels:
-    app: flask-app
+    app: nginx
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: flask-app
+      app: nginx
   template:
     metadata:
       labels:
-        app: flask-app
+        app: nginx
     spec:
       containers:
-      - name: flask-app
-        image: julienc/flask-app:latest
+      - name: nginx
+        image: nginx:latest
         ports:
-        - containerPort: 5000
-        env:
-        - name: FLASK_ENV
-          value: "production"
+        - containerPort: 80
         resources:
           requests:
             memory: "128Mi"
