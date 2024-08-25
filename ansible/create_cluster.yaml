@@ -4,6 +4,7 @@
   user: ubuntu
   vars:
     ansible_python_interpreter: auto
+    kubeconfig_path: /home/ubuntu/.kube/config
   tasks:
     - name: Update package cache
       apt:
@@ -164,28 +165,59 @@
         group: ubuntu
         mode: '0644'
 
-    - name: Update apt repository cache
+    - name: Update package cache
       apt:
         update_cache: yes
 
-    - name: Ensure pip3 is installed
+    - name: Ensure Python3 is installed
       apt:
-        name: python3-pip
+        name: python3
         state: present
 
-    - name: Install kubernetes using pip3 with --break-system-packages
-      command: /usr/bin/pip3 install kubernetes --break-system-packages # FIXME: install with venv
+    - name: Ensure pip3 and virtualenv are installed
+      apt:
+        name: 
+          - python3-pip
+          - python3-venv
+        state: present
 
-    - name: Deploy Calico Tigera Operator # FIXME: this need to wait for k8s to be ready before running- need to wait like 3 mins
-      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/tigera-operator.yaml
+    - name: Create a Python virtual environment
+      command: python3 -m venv /home/ubuntu/k8s_venv
+      args:
+        creates: /home/ubuntu/k8s_venv
+
+    - name: Install Kubernetes Python module in the virtual environment
+      command: /home/ubuntu/k8s_venv/bin/pip install kubernetes
+
+    - name: Wait for Kubernetes API server to be ready
+      wait_for:
+        port: 6443
+        host: 127.0.0.1
+        delay: 10
+        timeout: 300
       become: yes
+      
+    - name: Deploy Calico Tigera Operator # FIXME: this need to wait for k8s to be ready before running- need to wait like 3 mins
+      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/tigera-operator.yaml --validate=false
+      become: yes
+      retries: 5
+      delay: 60
 
     - name: Deploy Calico custom ressource
-      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/custom-resources.yaml
+      ansible.builtin.command: kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/custom-resources.yaml --validate=false
       become: yes
+      retries: 5
+      delay: 60
+      register: calico_custom_resource
+      until: calico_custom_resource.rc == 0
 
     - name: Untaint nodes
       ansible.builtin.command: kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+      become: yes
+      retries: 5
+      delay: 60
+      register: untaint_nodes
+      until: untaint_nodes.rc == 0
 
     - name: Update package cache
       apt:

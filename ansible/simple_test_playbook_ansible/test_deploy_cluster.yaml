@@ -1,0 +1,63 @@
+- name: Run a ping command and a small k8s deployment
+  hosts: k8s_masters
+  gather_facts: yes
+  user: ubuntu
+  vars:
+    ansible_python_interpreter: /home/ubuntu/k8s_venv/bin/python
+    kubeconfig_path: /home/ubuntu/.kube/config
+  tasks:
+    - name: Check connectivity with echo
+      command: echo "Hello, World!"
+      register: output
+
+    - name: Print command output
+      debug:
+        var: output.stdout
+    
+    - name: Verify connectivity
+      ping:
+
+    - name: Create namespace
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}" 
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: my-app-namespace
+      become: yes
+
+    - name: Deploy Nginx pod in the namespace
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: nginx-pod
+            namespace: my-app-namespace
+          spec:
+            containers:
+              - name: nginx
+                image: nginx:latest
+                ports:
+                  - containerPort: 80
+      become: yes
+
+    - name: Check if the Nginx pod is running
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ kubeconfig_path }}"
+        kind: Pod
+        namespace: my-app-namespace
+        name: nginx-pod
+      register: pod_info
+      until: pod_info.resources[0].status.phase == "Running"
+      retries: 5
+      delay: 10
+      become: yes
+
+    - name: Print pod status
+      debug:
+        var: pod_info.resources[0].status.phase

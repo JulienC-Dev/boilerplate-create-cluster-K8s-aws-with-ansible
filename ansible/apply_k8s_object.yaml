@@ -3,15 +3,31 @@
   hosts: k8s_masters
   become: yes
   user: ubuntu
+  vars:
+    ansible_python_interpreter: /home/ubuntu/k8s_venv/bin/python
   tasks:
-    - name: Apply Flask Deployment
-      kubernetes.core.k8s:
-        state: present
-        kubeconfig: ~/.kube/config
-        definition: "{{ lookup('file', 'k8s/deployment.yaml') }}"
+    - name: Wait for Kubernetes API server to be ready
+      wait_for:
+        port: 6443
+        host: 127.0.0.1
+        delay: 10
+        timeout: 300
+      become: yes
 
-    - name: Apply Flask Service
+    - name: Nginx namespace app
       kubernetes.core.k8s:
         state: present
-        kubeconfig: ~/.kube/config
-        definition: "{{ lookup('file', 'k8s/flask-service.yaml') }}"
+        kubeconfig: /home/ubuntu/.kube/config
+        definition: "{{ lookup('file', '/Users/julien/Desktop/boilerplate-create-cluster-K8s-aws-with-ansible/boilerplate-create-cluster-K8s-aws-with-ansible/k8s/nginx-app-namespace.yaml') }}" 
+
+    - name: Nginx Service
+      kubernetes.core.k8s:
+        state: present
+        kubeconfig: /home/ubuntu/.kube/config
+        definition: "{{ lookup('file', '/Users/julien/Desktop/boilerplate-create-cluster-K8s-aws-with-ansible/boilerplate-create-cluster-K8s-aws-with-ansible/k8s/nginx-service.yaml') }}" 
+
+    - name: Nginx Deployment
+      kubernetes.core.k8s:
+        state: present
+        kubeconfig: /home/ubuntu/.kube/config
+        definition: "{{ lookup('file', '/Users/julien/Desktop/boilerplate-create-cluster-K8s-aws-with-ansible/boilerplate-create-cluster-K8s-aws-with-ansible/k8s/nginx-deployment.yaml') }}"
